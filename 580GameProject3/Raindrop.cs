@@ -8,11 +8,12 @@ using System.Threading.Tasks;
 
 namespace _580GameProject3
 {
-    class Raindrop
+    class Raindrop : IBoundable
     {
         float scale = 0.15f;
 
-        public BoundingRectangle bounds;
+        public BoundingRectangle Bounds;
+        public BoundingRectangle bounds => Bounds;
 
         Sprite[] sprite;
 
@@ -21,6 +22,8 @@ namespace _580GameProject3
         public Vector2 Position;
 
         float velocity;
+
+        int velocityModifier;
 
         TimeSpan timer;
 
@@ -41,17 +44,18 @@ namespace _580GameProject3
             this.sprite = frames.ToArray();
             this.currentFrame = currentFrame;
             Position = new Vector2(x, 0);
-            bounds = new BoundingRectangle(Position.X - (int)(origin.X * scale), Position.Y - (int)(origin.Y * scale), 40, 40);
+            Bounds = new BoundingRectangle(Position.X - (int)(origin.X * scale), Position.Y - (int)(origin.Y * scale), 40, 40);
             timer = new TimeSpan(0);
+            velocityModifier = currentFrame;
 
         }
 
         public void Update(GameTime gameTime)
         {
 
-            velocity = velocity + 0.1f;
+            velocity = velocity + (velocityModifier *0.15f);
             Position.Y += velocity;// Position.Y + velocity;
-            bounds.Y += velocity;
+            Bounds.Y += velocity;
 
             timer += gameTime.ElapsedGameTime;
 

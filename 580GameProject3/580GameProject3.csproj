@@ -40,9 +40,16 @@
   <PropertyGroup>
     <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Visual Debug|x86'">
+    <OutputPath>bin\x86\Visual Debug\</OutputPath>
+    <DefineConstants>DEBUG;WINDOWS VISUAL DEBUG</DefineConstants>
+    <WarningLevel>0</WarningLevel>
+  </PropertyGroup>
   <ItemGroup>
+    <Compile Include="AxisList.cs" />
     <Compile Include="BoundingRectangle.cs" />
     <Compile Include="Game1.cs" />
+    <Compile Include="IBoundable.cs" />
     <Compile Include="Player.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

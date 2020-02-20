@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 namespace _580GameProject3
@@ -15,11 +16,18 @@ namespace _580GameProject3
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
         SpriteSheet sheet;
+        SpriteFont font;
         Player player;
         List<Raindrop> raindrops;
         IEnumerable<Sprite> raindropFrames;
         Random random;
-        TimeSpan timer;
+        TimeSpan timer, wellTimer;
+        AxisList world;
+
+        int score, highScore;
+        Sprite wellFrame;
+        BoundingRectangle wellSquare;
+        int DRIPRATE;
 
         public Game1()
         {
@@ -41,9 +49,15 @@ namespace _580GameProject3
             graphics.PreferredBackBufferHeight = 1000;
             graphics.ApplyChanges();
 
+            wellSquare = new BoundingRectangle(-100, 600, 400, 400);
             random = new Random(DateTime.Now.Second);
             timer = new TimeSpan(0);
+            wellTimer = new TimeSpan(0);
 
+            score = 0; 
+            highScore = 0;
+
+            DRIPRATE = 2000;
 
             base.Initialize();
         }
@@ -56,13 +70,14 @@ namespace _580GameProject3
         {
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
-            //player.LoadContent(Content);
             var t = Content.Load<Texture2D>("spriteSheet");
             sheet = new SpriteSheet(t, 400, 400);
-
+            font = Content.Load<SpriteFont>("File");
             var playerFrames = from index in Enumerable.Range(4, 2) select sheet[index];
             raindropFrames = from index in Enumerable.Range(0, 4) select sheet[index];
+            wellFrame = sheet[8];
             player = new Player(this, playerFrames);
+            world = new AxisList();
             //raindrop = new Raindrop(raindropFrames, 100);
 
             // TODO: use this.Content to load your game content here
@@ -91,27 +106,49 @@ namespace _580GameProject3
             player.Update(gameTime);
 
             timer += gameTime.ElapsedGameTime;
-            if (timer.TotalSeconds >= 2)
+            wellTimer += gameTime.ElapsedGameTime;
+            if (timer.TotalMilliseconds >= DRIPRATE)
             {
-                raindrops.Add(new Raindrop(raindropFrames, random.Next(1500), random.Next(3)));
+                var drop = new Raindrop(raindropFrames, random.Next(500, 1500), random.Next(3));
+                raindrops.Add(drop);
+                world.AddGameObject(drop);
                 timer = new TimeSpan(0);
+                DRIPRATE = 400;
             }
-            foreach(Raindrop drop in raindrops)
+
+            if(wellTimer.TotalSeconds >= 15)
+            {
+                
+                if (score > highScore)
+                    highScore = score;
+                score = 0;
+                wellTimer = new TimeSpan(0);
+            }
+            
+
+
+            if (player.bounds.CollidesWith(wellSquare) & player.IsFull())
+            {
+                player.EmptyBucket();
+                wellTimer = new TimeSpan(0);
+                score++;
+            }
+
+            var platformQuery = world.QueryRange(player.bounds.Y, player.bounds.Y + player.bounds.Height);
+            player.CheckForPlatformCollision(platformQuery);
+
+            foreach (Raindrop drop in raindrops)
             {
                 drop.Update(gameTime);
+                world.UpdateGameObject(drop);
                 if (drop.Position.Y > graphics.PreferredBackBufferHeight)
                     drop.needsRemoved = true;
-                if (drop.bounds.CollidesWith(player.bounds))
-                    if (!player.IsFull())
-                    {
-                        drop.needsRemoved = true;
-                        player.AddDrop();
-                    }
+                if (drop.needsRemoved == true)
+                    world.RemoveGameObject(drop);
             }
 
             raindrops.RemoveAll(drop => drop.needsRemoved == true);
 
-            //raindrop.Update(gameTime);
 
             base.Update(gameTime);
         }
@@ -122,17 +159,22 @@ namespace _580GameProject3
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.CornflowerBlue);
+            GraphicsDevice.Clear(Color.DarkGoldenrod);
             spriteBatch.Begin();
 
             // TODO: Add your drawing code here
             player.Draw(spriteBatch);
+            wellFrame.Draw(spriteBatch, wellSquare, Color.White);
 
             foreach (Raindrop drop in raindrops)
             {
                 drop.Draw(spriteBatch);
             }
-            //raindrop.Draw(spriteBatch);
+
+            spriteBatch.DrawString(font, $"Highscore: {highScore}", new Vector2(0, 10), Color.White);
+            spriteBatch.DrawString(font, $"Score: {score}", new Vector2(0, 50), Color.White);
+            spriteBatch.DrawString(font, $"Bucket Water Level: {(double)player.fillLevel / player.MAXFILLLEVEL*100}%",new Vector2(0,90), Color.White);
+            spriteBatch.DrawString(font, $"Time: {(int)wellTimer.TotalSeconds}", new Vector2(0, 130), Color.White);
 
             spriteBatch.End();
             base.Draw(gameTime);
