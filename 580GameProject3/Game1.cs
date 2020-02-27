@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 
-namespace _580GameProject3
+namespace _580GameProject4
 {
     /// <summary>
     /// This is the main type for your game.
@@ -28,6 +28,9 @@ namespace _580GameProject3
         Sprite wellFrame;
         BoundingRectangle wellSquare;
         int DRIPRATE;
+        internal static int ScreenWidth;
+        internal static int ScreenHeight;
+        private Camera camera;
 
         public Game1()
         {
@@ -48,6 +51,9 @@ namespace _580GameProject3
             graphics.PreferredBackBufferWidth = 1500;
             graphics.PreferredBackBufferHeight = 1000;
             graphics.ApplyChanges();
+
+            ScreenHeight = graphics.PreferredBackBufferHeight;
+            ScreenWidth = graphics.PreferredBackBufferWidth;
 
             wellSquare = new BoundingRectangle(-100, 600, 400, 400);
             random = new Random(DateTime.Now.Second);
@@ -76,6 +82,7 @@ namespace _580GameProject3
             var playerFrames = from index in Enumerable.Range(4, 2) select sheet[index];
             raindropFrames = from index in Enumerable.Range(0, 4) select sheet[index];
             wellFrame = sheet[8];
+            camera = new Camera();
             player = new Player(this, playerFrames);
             world = new AxisList();
             //raindrop = new Raindrop(raindropFrames, 100);
@@ -149,6 +156,7 @@ namespace _580GameProject3
 
             raindrops.RemoveAll(drop => drop.needsRemoved == true);
 
+            camera.Follow(player);
 
             base.Update(gameTime);
         }
@@ -160,7 +168,7 @@ namespace _580GameProject3
         protected override void Draw(GameTime gameTime)
         {
             GraphicsDevice.Clear(Color.DarkGoldenrod);
-            spriteBatch.Begin();
+            spriteBatch.Begin(transformMatrix: camera.Transform);
 
             // TODO: Add your drawing code here
             player.Draw(spriteBatch);
@@ -170,10 +178,12 @@ namespace _580GameProject3
             {
                 drop.Draw(spriteBatch);
             }
+            spriteBatch.End();
 
+            spriteBatch.Begin();
             spriteBatch.DrawString(font, $"Highscore: {highScore}", new Vector2(0, 10), Color.White);
             spriteBatch.DrawString(font, $"Score: {score}", new Vector2(0, 50), Color.White);
-            spriteBatch.DrawString(font, $"Bucket Water Level: {(double)player.fillLevel / player.MAXFILLLEVEL*100}%",new Vector2(0,90), Color.White);
+            spriteBatch.DrawString(font, $"Bucket Water Level: {(double)player.state.currentLevel / player.MAXFILLLEVEL*100}%",new Vector2(0,90), Color.White);
             spriteBatch.DrawString(font, $"Time: {(int)wellTimer.TotalSeconds}", new Vector2(0, 130), Color.White);
 
             spriteBatch.End();

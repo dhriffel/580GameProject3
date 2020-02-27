@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace _580GameProject3
+namespace _580GameProject4
 {
     public struct BoundingRectangle
     {

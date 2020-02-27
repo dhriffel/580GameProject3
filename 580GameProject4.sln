@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29306.81
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "580GameProject3", "580GameProject3\580GameProject3.csproj", "{E202AAF0-B79C-4771-A491-A7B6B52C8111}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "580GameProject4", "580GameProject3\580GameProject4.csproj", "{E202AAF0-B79C-4771-A491-A7B6B52C8111}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

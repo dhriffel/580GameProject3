@@ -48,8 +48,12 @@
   <ItemGroup>
     <Compile Include="AxisList.cs" />
     <Compile Include="BoundingRectangle.cs" />
+    <Compile Include="Camera.cs" />
+    <Compile Include="Fullness.cs" />
     <Compile Include="Game1.cs" />
     <Compile Include="IBoundable.cs" />
+    <Compile Include="Full.cs" />
+    <Compile Include="NotFull.cs" />
     <Compile Include="Player.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

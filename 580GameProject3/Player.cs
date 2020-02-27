@@ -4,15 +4,15 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
+using _580GameProject3;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
-namespace _580GameProject3
+namespace _580GameProject4
 {
-    class Player
+    public class Player
     {
         Game1 game;
 
@@ -34,27 +34,28 @@ namespace _580GameProject3
 
         int fullCheck = 0;
 
+        public Fullness state;
+
         public Player(Game1 game, IEnumerable<Sprite> frames)
         {
             this.sprite = frames.ToArray();
             this.game = game;
             Position = new Vector2(game.GraphicsDevice.Viewport.Width / 2, game.GraphicsDevice.Viewport.Height);
             bounds = new BoundingRectangle(Position.X - (int)(origin.X * scale), Position.Y - (int)(origin.Y * scale), 100, 100);
+            state = new NotFull(this);
         }
 
         public bool IsFull()
         {
-            return fullCheck == 1;
+            return state.isFull;
         }
         public void AddDrop()
         {
-            if (fillLevel < MAXFILLLEVEL)
-                fillLevel += 1;
+            state.AddDrop();
         }
         public void EmptyBucket()
         {
-            fillLevel = 0;
-            fullCheck = 0;
+            state.EmptyDrops();
         }
 
         public void CheckForPlatformCollision(IEnumerable<IBoundable> drops)
@@ -63,11 +64,12 @@ namespace _580GameProject3
 
             foreach (Raindrop drop in drops)
             {
-                if (bounds.CollidesWith(drop.bounds) & drop.needsRemoved == false & !IsFull())
+                if (bounds.CollidesWith(drop.bounds) & drop.needsRemoved == false & !state.isFull)
                 {
 
                     drop.needsRemoved = true;
-                    AddDrop();
+                    //AddDrop();
+                    state.AddDrop();
                     
 
                 }
@@ -96,7 +98,7 @@ namespace _580GameProject3
             Position.X += velocity;
             bounds.X += velocity;
             //bounds.X = Position.X;
-            velocity = velocity / (1.1f + fillLevel * 0.02f);
+            velocity = velocity / (1.1f + state.currentLevel * 0.02f);
 
             if (bounds.X + bounds.Width >= game.GraphicsDevice.Viewport.Width)
             {
@@ -115,7 +117,7 @@ namespace _580GameProject3
             if (fillLevel >= MAXFILLLEVEL)
                 fullCheck = 1;
 
-            Debug.WriteLine($"Bucket's fill level is {fillLevel}");
+            Debug.WriteLine($"Bucket's fill level is {state.currentLevel}");
         }
 
 
